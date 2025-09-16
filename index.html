@@ -3,13 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <title>割り勘アプリ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { font-family: sans-serif; padding: 20px; }
-    .person { margin: 5px 0; }
+    .person { margin: 5px 0; display: flex; flex-direction: column; }
+    input, button { 
+      width: 100%; 
+      max-width: 100%; 
+      box-sizing: border-box; 
+      padding: 8px; 
+      font-size: 1em; 
+      margin-top: 5px;
+    }
+    button { cursor: pointer; }
     .result {
       margin-top: 20px;
       font-weight: bold;
-      white-space: pre-wrap; /* タブと改行を保持 */
+      white-space: pre-wrap;
       tab-size: 4;
       -moz-tab-size: 4;
     }
@@ -17,7 +27,7 @@
 </head>
 <body>
   <h2>割り勘アプリ</h2>
-  <label>人数: <input type="number" id="numPeople" min="2" value="3"></label>
+  <label>人数: <input type="number" id="numPeople" min="2" value=""></label>
   <button onclick="setPeople()">決定</button>
   
   <div id="peopleInputs"></div>
@@ -27,25 +37,36 @@
 
   <script>
     function setPeople() {
-      const num = Number(document.getElementById("numPeople").value);
+      const numInput = document.getElementById("numPeople").value;
+      const num = Number(numInput);
+      if (!num || num < 2) {
+        alert("人数を2以上で入力してください");
+        return;
+      }
       const container = document.getElementById("peopleInputs");
       container.innerHTML = "";
       for (let i = 1; i <= num; i++) {
         container.innerHTML += `
           <div class="person">
-            ${i}. 名前: <input type="text" id="name${i}" value="">
-            支払額: <input type="number" id="amount${i}" value="">
+            <label>${i}. 名前:</label>
+            <input type="text" id="name${i}" value="">
+            <label>支払額:</label>
+            <input type="number" id="amount${i}" value="">
           </div>`;
       }
     }
 
     function calculate() {
       const num = Number(document.getElementById("numPeople").value);
+      if (!num || num < 2) {
+        alert("人数を正しく入力してください");
+        return;
+      }
+
       let names = [], amounts = [];
-      
       for (let i = 1; i <= num; i++) {
         const name = document.getElementById("name"+i).value.trim();
-        names.push(name || `人${i}`); // 空白なら「人1」「人2」…を補完
+        names.push(name || `人${i}`);
         const amount = document.getElementById("amount"+i).value;
         amounts.push(Number(amount) || 0);
       }
@@ -74,8 +95,7 @@
       document.getElementById("output").textContent = result;
     }
 
-    // 初期表示
-    setPeople();
+    // 初期表示は人数欄空白のため、setPeople() は呼ばない
   </script>
 </body>
 </html>
