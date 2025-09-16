@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>割り勘アプリ</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .person { margin: 5px 0; }
+    .result {
+      margin-top: 20px;
+      font-weight: bold;
+      white-space: pre-wrap; /* タブと改行を保持 */
+      tab-size: 4;
+      -moz-tab-size: 4;
+    }
+  </style>
+</head>
+<body>
+  <h2>割り勘アプリ</h2>
+  <label>人数: <input type="number" id="numPeople" min="2" value="3"></label>
+  <button onclick="setPeople()">決定</button>
+  
+  <div id="peopleInputs"></div>
+  <button onclick="calculate()">計算する</button>
+  
+  <div class="result" id="output"></div>
+
+  <script>
+    function setPeople() {
+      const num = Number(document.getElementById("numPeople").value);
+      const container = document.getElementById("peopleInputs");
+      container.innerHTML = "";
+      for (let i = 1; i <= num; i++) {
+        container.innerHTML += `
+          <div class="person">
+            ${i}. 名前: <input type="text" id="name${i}" value="">
+            支払額: <input type="number" id="amount${i}" value="">
+          </div>`;
+      }
+    }
+
+    function calculate() {
+      const num = Number(document.getElementById("numPeople").value);
+      let names = [], amounts = [];
+      
+      for (let i = 1; i <= num; i++) {
+        const name = document.getElementById("name"+i).value.trim();
+        names.push(name || `人${i}`); // 空白なら「人1」「人2」…を補完
+        const amount = document.getElementById("amount"+i).value;
+        amounts.push(Number(amount) || 0);
+      }
+      
+      const total = amounts.reduce((a,b)=>a+b,0);
+      const perPerson = total / num;
+      let balance = amounts.map(a => a - perPerson);
+      
+      let result = `合計金額: ${total.toFixed(1)} 円\n`;
+      result += `1人あたり: ${perPerson.toFixed(1)} 円\n\n`;
+      
+      for (let i = 0; i < num; i++) {
+        if (balance[i] < -1e-9) {
+          for (let j = 0; j < num; j++) {
+            if (balance[j] > 1e-9 && balance[i] < -1e-9) {
+              let pay = Math.min(balance[j], -balance[i]);
+              pay = Math.round(pay * 10) / 10;
+              balance[i] += pay;
+              balance[j] -= pay;
+              result += `\t${names[i]} → ${names[j]} に ${pay.toFixed(1)} 円支払う\n`;
+            }
+          }
+        }
+      }
+
+      document.getElementById("output").textContent = result;
+    }
+
+    // 初期表示
+    setPeople();
+  </script>
+</body>
+</html>
